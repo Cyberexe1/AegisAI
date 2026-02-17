@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AIChat from '../components/dashboard/AIChat';
 
 const SidebarItem = ({ icon: Icon, label, path, active }: { icon: any, label: string, path: string, active: boolean }) => (
     <Link
@@ -118,6 +119,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     {children}
                 </main>
             </div>
+
+            {/* AI Chat Component */}
+            <AIChat />
         </div>
     );
 };

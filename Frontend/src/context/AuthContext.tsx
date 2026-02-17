@@ -6,6 +6,7 @@ interface AuthContextType {
     user: { email: string; name: string; role: 'admin' | 'user' } | null;
     login: (email: string, pass: string) => boolean;
     logout: () => void;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -13,14 +14,22 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<{ email: string; name: string; role: 'admin' | 'user' } | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Check local storage on mount (optional persistence for demo)
         const storedUser = localStorage.getItem('aegis_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error('Failed to parse stored user:', error);
+                localStorage.removeItem('aegis_user');
+            }
         }
+        setLoading(false);
     }, []);
 
     const login = (email: string, pass: string) => {
@@ -52,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -12,11 +12,26 @@ import SettingsPage from './pages/dashboard/Settings';
 import LLMObservability from './pages/dashboard/LLMObservability';
 import UserDashboard from './pages/UserDashboard';
 import UserLoanApply from './pages/UserLoanApply';
+import UserLoans from './pages/UserLoans';
+import UserProfile from './pages/UserProfile';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Simple Route Protection Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, loading } = useAuth();
+    
+    // Show loading spinner while checking authentication
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+    
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
@@ -75,9 +90,19 @@ function App() {
                             <UserDashboard />
                         </ProtectedRoute>
                     } />
+                    <Route path="/user-dashboard/loans" element={
+                        <ProtectedRoute>
+                            <UserLoans />
+                        </ProtectedRoute>
+                    } />
                     <Route path="/user-dashboard/apply" element={
                         <ProtectedRoute>
                             <UserLoanApply />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/user-dashboard/profile" element={
+                        <ProtectedRoute>
+                            <UserProfile />
                         </ProtectedRoute>
                     } />
 

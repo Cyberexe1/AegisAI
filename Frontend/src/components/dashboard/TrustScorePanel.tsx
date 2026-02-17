@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { api, TrustScore } from '../../services/api';
@@ -99,7 +99,9 @@ const TrustScorePanel = () => {
                     <div className="flex justify-between items-center text-sm p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <span className="text-secondary font-medium">Autonomy Level</span>
                         <span className="text-primary font-bold px-2 py-0.5 rounded bg-accent text-xs">
-                            Human-on-Loop
+                            {trustData.autonomy_level.split('_').map(word => 
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join('-')}
                         </span>
                     </div>
                     <div className="space-y-2">
@@ -109,11 +111,25 @@ const TrustScorePanel = () => {
                         </div>
                         <div className="flex justify-between text-xs font-medium">
                             <span className="text-secondary">Data Drift</span>
-                            <span className="text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded">Moderate</span>
+                            <span className={`px-1.5 py-0.5 rounded ${
+                                trustData.contributing_metrics.drift_severity === 'high' ? 'text-red-500 bg-red-50' :
+                                trustData.contributing_metrics.drift_severity === 'moderate' ? 'text-amber-500 bg-amber-50' :
+                                'text-emerald-600 bg-emerald-50'
+                            }`}>
+                                {trustData.contributing_metrics.drift_severity?.charAt(0).toUpperCase() + 
+                                 trustData.contributing_metrics.drift_severity?.slice(1) || 'Low'}
+                            </span>
                         </div>
                         <div className="flex justify-between text-xs font-medium">
                             <span className="text-secondary">Model Uncertainty</span>
-                            <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Low</span>
+                            <span className={`px-1.5 py-0.5 rounded ${
+                                trustData.risk_factors.accuracy_drop > 0.05 ? 'text-red-500 bg-red-50' :
+                                trustData.risk_factors.accuracy_drop > 0.02 ? 'text-amber-500 bg-amber-50' :
+                                'text-emerald-600 bg-emerald-50'
+                            }`}>
+                                {trustData.risk_factors.accuracy_drop > 0.05 ? 'High' :
+                                 trustData.risk_factors.accuracy_drop > 0.02 ? 'Moderate' : 'Low'}
+                            </span>
                         </div>
                     </div>
                 </div>

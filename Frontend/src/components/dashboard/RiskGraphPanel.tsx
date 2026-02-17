@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Network, AlertTriangle, CheckCircle, Smartphone, Database, Server } from 'lucide-react';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../layouts/DashboardLayout';
+import UserDashboardLayout from '../layouts/UserDashboardLayout';
 import { api, PredictionInput, PredictionResponse } from '../services/api';
 import { Calculator, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 
@@ -8,23 +8,51 @@ const UserLoanApply = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [accepting, setAccepting] = useState(false);
     const [result, setResult] = useState<PredictionResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // For demo purposes, using a default user ID
+    const userId = 'demo-user-001';
 
     const [formData, setFormData] = useState<PredictionInput>({
         income: 60000,
         age: 30,
         loan_amount: 15000,
-        credit_history: 700,
-        employment_type: 'full-time',
+        credit_history: 'Good',  // Changed to string
+        employment_type: 'Full-time',  // Capitalized to match backend enum
         existing_debts: 5000,
     });
 
+    // Store credit score separately for display
+    const [creditScore, setCreditScore] = useState(700);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        
+        // Handle credit score separately
+        if (name === 'credit_score') {
+            const score = parseFloat(value) || 300;
+            setCreditScore(score);
+            
+            // Convert credit score to credit history category
+            let creditHistory = 'Poor';
+            if (score >= 700) {
+                creditHistory = 'Good';
+            } else if (score >= 600) {
+                creditHistory = 'Fair';
+            }
+            
+            setFormData(prev => ({
+                ...prev,
+                credit_history: creditHistory
+            }));
+            return;
+        }
+        
         setFormData(prev => ({
             ...prev,
-            [name]: ['income', 'age', 'loan_amount', 'credit_history', 'existing_debts'].includes(name)
+            [name]: ['income', 'age', 'loan_amount', 'existing_debts'].includes(name)
                 ? parseFloat(value) || 0
                 : value
         }));
@@ -36,20 +64,43 @@ const UserLoanApply = () => {
         setError(null);
 
         try {
-            // Simulate API delay for better UX
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            const prediction = await api.predict(formData);
+            // Add user_id to the prediction request
+            const predictionData = {
+                ...formData,
+                user_id: userId
+            };
+            
+            const prediction = await api.predict(predictionData);
             setResult(prediction);
             setStep(2); // Move to result step
         } catch (err) {
             setError('Application processing failed. Please try again.');
+            console.error('Prediction error:', err);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleAcceptOffer = async () => {
+        setAccepting(true);
+        try {
+            // Simulate accepting the offer
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Show success message
+            alert('Congratulations! Your loan has been approved and will be processed within 24 hours.');
+            
+            // Navigate back to dashboard
+            navigate('/user-dashboard');
+        } catch (err) {
+            alert('Failed to accept offer. Please try again.');
+        } finally {
+            setAccepting(false);
+        }
+    };
+
     return (
-        <DashboardLayout>
+        <UserDashboardLayout>
             <div className="max-w-3xl mx-auto">
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-primary">Apply for a Personal Loan</h1>
@@ -90,24 +141,27 @@ const UserLoanApply = () => {
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     >
-                                        <option value="full-time">Full-Time</option>
-                                        <option value="part-time">Part-Time</option>
-                                        <option value="self-employed">Self-Employed</option>
-                                        <option value="unemployed">Unemployed</option>
+                                        <option value="Full-time">Full-Time</option>
+                                        <option value="Part-time">Part-Time</option>
+                                        <option value="Self-employed">Self-Employed</option>
+                                        <option value="Unemployed">Unemployed</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Credit Score (Estimate)</label>
                                     <input
                                         type="number"
-                                        name="credit_history"
-                                        value={formData.credit_history}
+                                        name="credit_score"
+                                        value={creditScore}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         required
                                         min="300"
                                         max="850"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {creditScore >= 700 ? '✓ Good' : creditScore >= 600 ? '⚠ Fair' : '✗ Poor'} credit history
+                                    </p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Age</label>
@@ -136,7 +190,7 @@ const UserLoanApply = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-lg shadow-xl shadow-primary/20 transition-all flex items-center justify-center space-x-2"
+                                className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-lg shadow-xl shadow-primary/20 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? (
                                     <>
@@ -150,6 +204,12 @@ const UserLoanApply = () => {
                                     </>
                                 )}
                             </button>
+
+                            {error && (
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-red-800 text-sm font-medium">{error}</p>
+                                </div>
+                            )}
                         </form>
                     </div>
                 )}
@@ -193,14 +253,36 @@ const UserLoanApply = () => {
 
                             <div className="flex space-x-4">
                                 <button
-                                    onClick={() => navigate('/user-dashboard')}
+                                    onClick={() => {
+                                        setStep(1);
+                                        setResult(null);
+                                        setError(null);
+                                    }}
                                     className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
                                 >
-                                    Back to Dashboard
+                                    {result.approval_probability > 0.6 ? 'Back to Dashboard' : 'Try Again'}
                                 </button>
-                                {result.approval_probability > 0.6 && (
-                                    <button className="flex-1 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
-                                        Accept Offer
+                                {result.approval_probability > 0.6 ? (
+                                    <button 
+                                        onClick={handleAcceptOffer}
+                                        disabled={accepting}
+                                        className="flex-1 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                                    >
+                                        {accepting ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            <span>Accept Offer</span>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => navigate('/user-dashboard')}
+                                        className="flex-1 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all"
+                                    >
+                                        Back to Dashboard
                                     </button>
                                 )}
                             </div>
@@ -208,7 +290,7 @@ const UserLoanApply = () => {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </UserDashboardLayout>
     );
 };
 

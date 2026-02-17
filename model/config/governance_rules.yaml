@@ -1,0 +1,210 @@
+# AegisAI Governance Rules Configuration
+
+# Trust Score Calculation
+trust_calculation:
+  weights:
+    drift_penalty: 30      # Weight for data drift penalty
+    accuracy_penalty: 25   # Weight for accuracy drop penalty
+    bias_penalty: 20       # Weight for bias/fairness penalty
+    override_penalty: 10   # Weight for manual override penalty
+  
+  formula: "Trust = 100 - (Drift × 30) - (Accuracy Drop × 25) - (Bias × 20) - (Overrides × 10)"
+
+# Data Drift Thresholds
+drift_thresholds:
+  psi:
+    low: 0.1        # PSI < 0.1: No significant change
+    moderate: 0.2   # PSI 0.1-0.2: Moderate change
+    high: 0.3       # PSI > 0.2: Significant change
+  
+  ks_test:
+    alpha: 0.05     # Significance level for KS test
+
+# Model Performance Thresholds
+performance_thresholds:
+  accuracy:
+    baseline: 0.95           # Expected baseline accuracy
+    acceptable_drop: 0.02    # < 2% drop is acceptable
+    concerning_drop: 0.05    # 2-5% drop is concerning
+    critical_drop: 0.10      # > 5% drop is critical
+  
+  confidence:
+    minimum: 0.70            # Minimum acceptable confidence
+    warning: 0.80            # Warning threshold
+
+# Autonomy Levels
+autonomy_levels:
+  fully_autonomous:
+    trust_min: 80
+    trust_max: 100
+    description: "Model operates independently without human intervention"
+    human_intervention: "none"
+    approval_required: false
+    monitoring_level: "standard"
+  
+  human_on_loop:
+    trust_min: 60
+    trust_max: 79
+    description: "Human monitors but doesn't approve each decision"
+    human_intervention: "monitoring"
+    approval_required: false
+    monitoring_level: "enhanced"
+  
+  approval_required:
+    trust_min: 40
+    trust_max: 59
+    description: "Human must approve high-risk decisions"
+    human_intervention: "approval"
+    approval_required: true
+    monitoring_level: "intensive"
+  
+  kill_switch:
+    trust_min: 0
+    trust_max: 39
+    description: "Model stopped, all decisions require manual review"
+    human_intervention: "full_control"
+    approval_required: true
+    monitoring_level: "critical"
+
+# Incident Severity Levels
+incident_severity:
+  critical:
+    conditions:
+      - "psi_score > 0.3"
+      - "accuracy_drop > 0.10"
+      - "trust_score < 40"
+    actions:
+      - "kill_switch"
+      - "immediate_notification"
+      - "incident_creation"
+    response_time: "immediate"
+  
+  high:
+    conditions:
+      - "psi_score > 0.2"
+      - "accuracy_drop > 0.05"
+      - "trust_score < 60"
+    actions:
+      - "reduce_autonomy"
+      - "notification"
+      - "incident_creation"
+    response_time: "15_minutes"
+  
+  moderate:
+    conditions:
+      - "psi_score > 0.1"
+      - "accuracy_drop > 0.02"
+      - "trust_score < 80"
+    actions:
+      - "monitoring_alert"
+      - "log_event"
+    response_time: "1_hour"
+  
+  low:
+    conditions:
+      - "psi_score < 0.1"
+      - "accuracy_drop < 0.02"
+      - "trust_score >= 80"
+    actions:
+      - "log_event"
+    response_time: "24_hours"
+
+# Notification Configuration
+notifications:
+  critical:
+    channels:
+      - "email"
+      - "slack"
+      - "pagerduty"
+    immediate: true
+    escalation: true
+    recipients:
+      - "ml-ops-team@company.com"
+      - "governance-team@company.com"
+  
+  high:
+    channels:
+      - "email"
+      - "slack"
+    immediate: true
+    escalation: false
+    recipients:
+      - "ml-ops-team@company.com"
+  
+  moderate:
+    channels:
+      - "email"
+    immediate: false
+    escalation: false
+    recipients:
+      - "ml-ops-team@company.com"
+  
+  low:
+    channels:
+      - "log"
+    immediate: false
+    escalation: false
+
+# Governance Actions
+governance_actions:
+  kill_switch:
+    description: "Stop all automated predictions"
+    requires_approval: true
+    notification_level: "critical"
+    reversible: true
+  
+  require_approval:
+    description: "Require human approval for all predictions"
+    requires_approval: true
+    notification_level: "high"
+    reversible: true
+  
+  human_review:
+    description: "Flag predictions for human review"
+    requires_approval: false
+    notification_level: "moderate"
+    reversible: true
+  
+  none:
+    description: "No governance action required"
+    requires_approval: false
+    notification_level: "low"
+    reversible: true
+
+# Bias and Fairness Thresholds
+fairness_thresholds:
+  demographic_parity:
+    acceptable: 0.05    # < 5% difference acceptable
+    concerning: 0.10    # 5-10% difference concerning
+    critical: 0.20      # > 10% difference critical
+  
+  equal_opportunity:
+    acceptable: 0.05
+    concerning: 0.10
+    critical: 0.20
+
+# Manual Override Tracking
+override_tracking:
+  time_window: 24         # Hours to track overrides
+  warning_threshold: 5    # Number of overrides to trigger warning
+  critical_threshold: 10  # Number of overrides to trigger critical alert
+
+# Monitoring Configuration
+monitoring:
+  trust_calculation_frequency: "5_minutes"
+  drift_check_frequency: "1_hour"
+  performance_check_frequency: "1_hour"
+  health_check_frequency: "5_minutes"
+  
+  retention:
+    trust_scores: 90        # Days to retain trust scores
+    incidents: 365          # Days to retain incidents
+    governance_logs: 180    # Days to retain governance logs
+
+# Explainability
+explainability:
+  enabled: true
+  include_feature_importance: true
+  include_drift_details: true
+  include_performance_metrics: true
+  human_readable_explanations: true

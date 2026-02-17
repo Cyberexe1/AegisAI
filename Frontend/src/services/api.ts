@@ -4,19 +4,21 @@ export interface PredictionInput {
   income: number;
   age: number;
   loan_amount: number;
-  credit_history: number;
+  credit_history: string;  // Changed from number to string
   employment_type: string;
   existing_debts: number;
+  user_id?: string;  // Added optional user_id
 }
 
 export interface PredictionResponse {
-  risk_score: number;
+  risk_score?: number;  // Made optional since backend doesn't return this
   risk_category: string;
-  confidence: number;
+  confidence: number;  // Backend calls this confidence_score
   approval_probability: number;
   processing_time_ms: number;
   model_version: string;
-  timestamp: string;
+  timestamp?: string;  // Made optional
+  confidence_score?: number;  // Backend field name
 }
 
 export interface TrustScore {
@@ -170,6 +172,70 @@ export const api = {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to simulate incident');
+    return response.json();
+  },
+
+  async exportReport(): Promise<Blob> {
+    const response = await fetch(`${API_BASE_URL}/governance/export-report`);
+    if (!response.ok) throw new Error('Failed to export report');
+    return response.blob();
+  },
+
+  // Simulation endpoints (for demo/hackathon)
+  async simulateDrift(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/simulation/drift`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to simulate drift');
+    return response.json();
+  },
+
+  async simulateBias(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/simulation/bias`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to simulate bias');
+    return response.json();
+  },
+
+  async simulateAccuracyDrop(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/simulation/accuracy-drop`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to simulate accuracy drop');
+    return response.json();
+  },
+
+  async resetSimulation(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/simulation/reset`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to reset simulation');
+    return response.json();
+  },
+
+  async getSimulationStatus(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/simulation/status`);
+    if (!response.ok) throw new Error('Failed to get simulation status');
+    return response.json();
+  },
+
+  // Loan endpoints
+  async getUserLoans(userId: string): Promise<any> {
+    const response = await fetch(`http://localhost:5000/api/loans/user/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user loans');
+    return response.json();
+  },
+
+  async getRecentLoans(limit: number = 10): Promise<any> {
+    const response = await fetch(`http://localhost:5000/api/loans/recent?limit=${limit}`);
+    if (!response.ok) throw new Error('Failed to fetch recent loans');
+    return response.json();
+  },
+
+  async getLoanDetails(loanId: string): Promise<any> {
+    const response = await fetch(`http://localhost:5000/api/loans/${loanId}`);
+    if (!response.ok) throw new Error('Failed to fetch loan details');
     return response.json();
   },
 

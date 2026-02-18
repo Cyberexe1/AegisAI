@@ -37,7 +37,7 @@ matplotlib==3.8.2
 psutil==5.9.6
 
 # LLM Integration (OpenRouter)
-requests==2.31.0
+requests==2.32.3
 
 # Explainability
 shap==0.44.0

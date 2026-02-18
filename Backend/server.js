@@ -55,11 +55,13 @@ const predictRoutes = require('./routes/predict');
 const historyRoutes = require('./routes/history');
 const statsRoutes = require('./routes/stats');
 const loansRoutes = require('./routes/loans');
+const alertRoutes = require('./routes/alerts');
 
 app.use('/api/predict', predictRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/loans', loansRoutes);
+app.use('/api/alerts', alertRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -87,6 +89,14 @@ app.listen(PORT, () => {
   console.log(`🚀 AegisAI Backend running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 ML API: ${process.env.ML_API_URL || 'http://localhost:8000'}`);
+  
+  // Start alert monitoring
+  if (process.env.ENABLE_ALERTS !== 'false') {
+    const AlertIntegration = require('./services/alertIntegration');
+    const alertIntegration = new AlertIntegration();
+    alertIntegration.startMonitoring(5); // Check every 5 minutes
+    console.log('🚨 Alert monitoring started');
+  }
 });
 
 module.exports = app;

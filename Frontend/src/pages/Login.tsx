@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, ArrowRight, Lock, Mail } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Lock, Mail, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login = () => {
@@ -35,6 +35,17 @@ const Login = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden relative z-10"
             >
+                {/* Back to Homepage Button */}
+                <div className="absolute top-4 left-4 z-20">
+                    <Link
+                        to="/"
+                        className="flex items-center space-x-2 px-3 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg text-secondary hover:text-primary hover:border-primary transition-all shadow-sm hover:shadow-md group"
+                    >
+                        <Home className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <span className="text-sm font-medium">Home</span>
+                    </Link>
+                </div>
+
                 <div className="p-8">
                     <div className="flex flex-col items-center mb-8">
                         <div className="p-3 bg-primary rounded-xl text-white mb-4 shadow-lg shadow-green-900/20">

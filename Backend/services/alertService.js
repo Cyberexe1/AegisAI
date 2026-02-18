@@ -5,7 +5,7 @@ require('dotenv').config();
 class AlertService {
     constructor() {
         // Email transporter (Gmail SMTP)
-        this.emailTransporter = nodemailer.createTransporter({
+        this.emailTransporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.GMAIL_USER,

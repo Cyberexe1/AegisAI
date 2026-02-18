@@ -30,7 +30,7 @@ httpx==0.25.2
 # Environment Management
 python-dotenv==1.0.0
 # Phase 2: Monitoring & Observability
-evidently==0.4.44
+evidently==0.4.40
 scipy==1.11.4
 matplotlib==3.8.2
 psutil==5.9.6

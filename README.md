@@ -11,7 +11,7 @@
 
 **The first AI governance platform that prevents failures before they happen**
 
-[🚀 Live Demo](#demo) • [📖 Documentation](#documentation) • [🎯 Features](#features) • [🏗️ Architecture](#architecture) • [👥 Team](#team)
+[🚀 Live Demo](https://aegis-ai-eight.vercel.app/) • [📖 Documentation](#documentation) • [🎯 Features](#features) • [🏗️ Architecture](#architecture) • [👥 Team](#team)
 
 </div>
 
@@ -223,6 +223,17 @@ docker-compose down
 ---
 
 ## 📊 Demo
+
+### 🌐 Live Demo
+**Try it now:** [https://aegis-ai-eight.vercel.app/](https://aegis-ai-eight.vercel.app/)
+
+The live demo showcases:
+- ✅ Real-time trust score monitoring
+- ✅ Data drift detection dashboard
+- ✅ Risk propagation visualization
+- ✅ Model health metrics
+- ✅ LLM observability panel
+- ✅ Incident simulation controls
 
 ### Incident Response Demo
 

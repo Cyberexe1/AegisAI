@@ -1,0 +1,50 @@
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Data Validation
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+pymongo==4.6.0
+motor==3.3.2
+
+# Data Processing
+pandas==2.1.3
+numpy==1.26.2
+
+# Machine Learning
+scikit-learn==1.3.2
+xgboost==2.0.2
+joblib==1.3.2
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+hypothesis==6.92.1
+mongomock==4.1.2
+httpx==0.25.2
+
+# Environment Management
+python-dotenv==1.0.0
+
+# CORS
+python-cors==1.0.0
+
+# Monitoring & Observability
+evidently==0.4.44
+scipy==1.11.4
+matplotlib==3.8.2
+psutil==5.9.6
+
+# LLM Integration (OpenRouter)
+requests==2.31.0
+
+# Explainability
+shap==0.44.0
+
+# Additional dependencies for production
+gunicorn==21.2.0
+pyyaml==6.0.1

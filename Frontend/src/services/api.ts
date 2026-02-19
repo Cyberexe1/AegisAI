@@ -125,8 +125,8 @@ export const api = {
   },
 
   // Monitoring
-  async getDrift(): Promise<{ drift_results: DriftResult[] }> {
-    const response = await fetch(`${API_BASE_URL}/monitoring/drift`);
+  async getDrift(hours: number = 24): Promise<{ drift_results: DriftResult[] }> {
+    const response = await fetch(`${API_BASE_URL}/monitoring/drift?hours=${hours}`);
     if (!response.ok) throw new Error('Failed to fetch drift data');
     return response.json();
   },

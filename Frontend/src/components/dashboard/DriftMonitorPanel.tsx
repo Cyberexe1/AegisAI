@@ -10,7 +10,10 @@ const DriftMonitorPanel = () => {
     useEffect(() => {
         const fetchDrift = async () => {
             try {
-                const data = await api.getDrift();
+                // Request 24 hours of data to ensure we have enough predictions
+                const response = await fetch(`http://localhost:8000/monitoring/drift?hours=24`);
+                if (!response.ok) throw new Error('Failed to fetch drift data');
+                const data = await response.json();
                 setDriftData(data.drift_results || []);
                 setError(null);
             } catch (error) {

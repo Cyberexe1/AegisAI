@@ -61,8 +61,8 @@ logs/
 *.sqlite
 *.sqlite3
 
-# Model files (large binary files)
-*.joblib
+# Model files (large binary files) - EXCEPT the trained model we need
+# *.joblib  # Commented out to allow trained model
 *.pkl
 *.h5
 *.pb
@@ -98,7 +98,7 @@ Backend/.env.local
 model/__pycache__/
 model/.env
 model/.env.local
-model/trained_models/*.joblib
+# model/trained_models/*.joblib  # Commented out - we need the trained model
 model/data/*.csv
 
 # Test coverage

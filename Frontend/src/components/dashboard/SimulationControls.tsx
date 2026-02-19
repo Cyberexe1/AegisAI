@@ -68,7 +68,7 @@ const SimulationControls = () => {
 
   return (
     <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 bg-purple-100 rounded-lg">
             <AlertTriangle className="w-4 h-4 text-purple-600" />
@@ -79,12 +79,28 @@ const SimulationControls = () => {
           </div>
         </div>
 
+        {/* Reset Button */}
+        {simulationActive && (
+          <button
+            onClick={handleReset}
+            disabled={simulating !== null}
+            className="flex items-center space-x-2 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>{simulating === 'reset' ? 'Resetting...' : 'Reset'}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Simulation Buttons - Two Rows */}
+      <div className="space-y-2">
+        {/* First Row: Drift and Bias */}
         <div className="flex items-center space-x-2">
           {/* Drift Simulation */}
           <button
             onClick={() => handleSimulate('drift')}
             disabled={simulating !== null}
-            className="flex items-center space-x-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <AlertTriangle className="w-4 h-4" />
             <span>{simulating === 'drift' ? 'Simulating...' : 'Simulate Drift'}</span>
@@ -94,33 +110,23 @@ const SimulationControls = () => {
           <button
             onClick={() => handleSimulate('bias')}
             disabled={simulating !== null}
-            className="flex items-center space-x-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Scale className="w-4 h-4" />
             <span>{simulating === 'bias' ? 'Simulating...' : 'Simulate Bias'}</span>
           </button>
+        </div>
 
-          {/* Accuracy Drop Simulation */}
+        {/* Second Row: Accuracy Drop */}
+        <div className="flex items-center">
           <button
             onClick={() => handleSimulate('accuracy')}
             disabled={simulating !== null}
-            className="flex items-center space-x-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <TrendingDown className="w-4 h-4" />
             <span>{simulating === 'accuracy' ? 'Simulating...' : 'Accuracy Drop'}</span>
           </button>
-
-          {/* Reset Button */}
-          {simulationActive && (
-            <button
-              onClick={handleReset}
-              disabled={simulating !== null}
-              className="flex items-center space-x-2 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>{simulating === 'reset' ? 'Resetting...' : 'Reset'}</span>
-            </button>
-          )}
         </div>
       </div>
 

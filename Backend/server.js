@@ -56,12 +56,14 @@ const historyRoutes = require('./routes/history');
 const statsRoutes = require('./routes/stats');
 const loansRoutes = require('./routes/loans');
 const alertRoutes = require('./routes/alerts');
+const incidentRoutes = require('./routes/incidents');
 
 app.use('/api/predict', predictRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/loans', loansRoutes);
 app.use('/api/alerts', alertRoutes);
+app.use('/api/incidents', incidentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -35,11 +35,24 @@ const Dashboard = () => {
     const handleSimulateIncident = async () => {
         setSimulatingIncident(true);
         try {
-            await api.simulateIncident();
-            alert('Incident simulated successfully! Trust score will update.');
+            const result = await api.simulateIncident();
+            
+            if (result.success && result.notification?.email_sent) {
+                alert('✅ Incident simulated successfully!\n\n' +
+                      '📧 Email notification sent to: ' + (process.env.ALERT_EMAIL_TO || 'vikastiwari1045@gmail.com') + '\n' +
+                      '📊 Trust score will update.\n' +
+                      '🔍 Check your email for incident details.');
+            } else {
+                alert('⚠️ Incident simulated but email notification failed.\n' +
+                      'Trust score will still update.');
+            }
+            
+            // Trigger dashboard refresh
+            window.dispatchEvent(new Event('simulation-triggered'));
         } catch (error) {
             console.error('Failed to simulate incident:', error);
-            alert('Failed to simulate incident. Ensure backend is running.');
+            alert('❌ Failed to simulate incident.\n' +
+                  'Make sure both Backend (port 5000) and ML API (port 8000) are running.');
         } finally {
             setSimulatingIncident(false);
         }

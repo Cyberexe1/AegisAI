@@ -169,7 +169,7 @@ export const api = {
   },
 
   async simulateIncident(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/governance/simulate-incident`, {
+    const response = await fetch('http://localhost:5000/api/incidents/simulate', {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to simulate incident');
@@ -184,7 +184,7 @@ export const api = {
 
   // Simulation endpoints (for demo/hackathon)
   async simulateDrift(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/simulation/drift`, {
+    const response = await fetch('http://localhost:5000/api/incidents/simulate-drift', {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to simulate drift');
@@ -192,7 +192,7 @@ export const api = {
   },
 
   async simulateBias(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/simulation/bias`, {
+    const response = await fetch('http://localhost:5000/api/incidents/simulate-bias', {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to simulate bias');
@@ -200,7 +200,7 @@ export const api = {
   },
 
   async simulateAccuracyDrop(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/simulation/accuracy-drop`, {
+    const response = await fetch('http://localhost:5000/api/incidents/simulate-accuracy-drop', {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to simulate accuracy drop');

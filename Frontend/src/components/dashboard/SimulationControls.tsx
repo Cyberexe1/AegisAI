@@ -24,21 +24,25 @@ const SimulationControls = () => {
       
       setSimulationActive(true);
       
-      // Show success message
+      // Show success message with email notification status
       const messages = {
-        drift: '🔴 Drift scenario activated! Watch trust score decrease.',
-        bias: '⚠️ Bias detected! Governance alerts triggered.',
-        accuracy: '📉 Accuracy drop simulated! Review required.'
+        drift: '🔴 Drift scenario activated!\n📧 Email alert sent\n📊 Watch trust score decrease.',
+        bias: '⚠️ Bias detected!\n📧 Email alert sent\n🚨 Governance alerts triggered.',
+        accuracy: '📉 Accuracy drop simulated!\n📧 Email alert sent\n🔍 Review required.'
       };
       
-      alert(messages[type]);
+      if (response.success && response.notification?.email_sent) {
+        alert(messages[type]);
+      } else {
+        alert(messages[type].replace('📧 Email alert sent', '⚠️ Email alert failed'));
+      }
       
       // Trigger dashboard refresh
       window.dispatchEvent(new Event('simulation-triggered'));
       
     } catch (error) {
       console.error(`Failed to simulate ${type}:`, error);
-      alert(`Failed to simulate ${type}. Ensure backend is running.`);
+      alert(`❌ Failed to simulate ${type}.\nMake sure Backend (port 5000) and ML API (port 8000) are running.`);
     } finally {
       setSimulating(null);
     }

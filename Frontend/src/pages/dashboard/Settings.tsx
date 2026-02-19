@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { Bell, Shield, Save } from 'lucide-react';
 
 const SettingsPage = () => {
+    const [saving, setSaving] = useState(false);
+    const [settings, setSettings] = useState({
+        emailAlerts: true,
+        dailySummary: true,
+        weeklyDigest: false,
+        sessionTimeout: '30',
+        twoFactorEnabled: false
+    });
+
+    // Load settings on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('userSettings');
+        if (saved) {
+            try {
+                setSettings(JSON.parse(saved));
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+            }
+        }
+    }, []);
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            // Save to localStorage (can be replaced with API call later)
+            localStorage.setItem('userSettings', JSON.stringify(settings));
+            
+            // Show success message
+            alert('✅ Settings saved successfully!');
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            alert('❌ Failed to save settings');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleEnable2FA = () => {
+        alert('🔐 2FA Setup\n\nThis feature requires backend implementation.\nFor now, this is a placeholder for the 2FA setup flow.');
+    };
+
     return (
         <DashboardLayout>
             <div className="max-w-4xl mx-auto">
@@ -38,15 +79,30 @@ const SettingsPage = () => {
 
                             <div className="space-y-4 pl-12">
                                 <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <input type="checkbox" defaultChecked className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" />
+                                    <input 
+                                        type="checkbox" 
+                                        checked={settings.emailAlerts}
+                                        onChange={(e) => setSettings({...settings, emailAlerts: e.target.checked})}
+                                        className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" 
+                                    />
                                     <span className="text-secondary group-hover:text-primary transition-colors">Email alerts for critical risk events</span>
                                 </label>
                                 <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <input type="checkbox" defaultChecked className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" />
+                                    <input 
+                                        type="checkbox" 
+                                        checked={settings.dailySummary}
+                                        onChange={(e) => setSettings({...settings, dailySummary: e.target.checked})}
+                                        className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" 
+                                    />
                                     <span className="text-secondary group-hover:text-primary transition-colors">Daily governance summary report</span>
                                 </label>
                                 <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <input type="checkbox" className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" />
+                                    <input 
+                                        type="checkbox" 
+                                        checked={settings.weeklyDigest}
+                                        onChange={(e) => setSettings({...settings, weeklyDigest: e.target.checked})}
+                                        className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer" 
+                                    />
                                     <span className="text-secondary group-hover:text-primary transition-colors">Weekly system health digest</span>
                                 </label>
                             </div>
@@ -65,20 +121,29 @@ const SettingsPage = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-secondary mb-2">Two-Factor Authentication</label>
                                     <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-slate-50">
-                                        <div className="text-sm text-gray-500">Secure your account with 2FA</div>
-                                        <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-primary hover:bg-gray-50 transition-colors shadow-sm">
-                                            Enable 2FA
+                                        <div className="text-sm text-gray-500">
+                                            {settings.twoFactorEnabled ? 'Enabled' : 'Secure your account with 2FA'}
+                                        </div>
+                                        <button 
+                                            onClick={handleEnable2FA}
+                                            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-primary hover:bg-gray-50 transition-colors shadow-sm"
+                                        >
+                                            {settings.twoFactorEnabled ? 'Manage 2FA' : 'Enable 2FA'}
                                         </button>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-secondary mb-2">Session Timeout Policy</label>
-                                    <select className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-secondary bg-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all appearance-none cursor-pointer hover:border-gray-300">
-                                        <option>15 minutes (High Security)</option>
-                                        <option>30 minutes (Standard)</option>
-                                        <option>1 hour (Convenience)</option>
-                                        <option>4 hours (Developer Mode)</option>
+                                    <select 
+                                        value={settings.sessionTimeout}
+                                        onChange={(e) => setSettings({...settings, sessionTimeout: e.target.value})}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-secondary bg-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all appearance-none cursor-pointer hover:border-gray-300"
+                                    >
+                                        <option value="15">15 minutes (High Security)</option>
+                                        <option value="30">30 minutes (Standard)</option>
+                                        <option value="60">1 hour (Convenience)</option>
+                                        <option value="240">4 hours (Developer Mode)</option>
                                     </select>
                                 </div>
                             </div>
@@ -86,9 +151,13 @@ const SettingsPage = () => {
                     </div>
 
                     <div className="p-6 bg-slate-50 border-t border-gray-100 flex justify-end">
-                        <button className="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-green-900 transition-all shadow-lg shadow-green-900/10 flex items-center hover:scale-[1.02] active:scale-[0.98]">
+                        <button 
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-green-900 transition-all shadow-lg shadow-green-900/10 flex items-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             <Save className="w-4 h-4 mr-2" />
-                            Save Preferences
+                            {saving ? 'Saving...' : 'Save Preferences'}
                         </button>
                     </div>
                 </div>

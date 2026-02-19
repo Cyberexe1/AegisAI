@@ -109,9 +109,24 @@ const Login = () => {
                     </div>
                 </div>
 
-                <div className="px-8 py-4 bg-slate-50 border-t border-gray-100 text-center text-xs text-gray-400">
-                    <span className="font-mono bg-white px-2 py-1 rounded border border-gray-200 mr-2">vikastiwari1045@gmail.com</span>
-                    <span className="font-mono bg-white px-2 py-1 rounded border border-gray-200">Vikas123@</span>
+                <div className="px-8 py-4 bg-slate-50 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 font-medium mb-3 text-center">Demo Credentials</p>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200">
+                            <span className="text-xs text-gray-600 font-medium">Admin:</span>
+                            <div className="flex gap-2">
+                                <span className="font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-gray-200">vikastiwari1045@gmail.com</span>
+                                <span className="font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-gray-200">Vikas123@</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200">
+                            <span className="text-xs text-gray-600 font-medium">User:</span>
+                            <div className="flex gap-2">
+                                <span className="font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-gray-200">user@agesai.com</span>
+                                <span className="font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-gray-200">User123@</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </motion.div>
         </div>

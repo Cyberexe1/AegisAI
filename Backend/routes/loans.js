@@ -9,7 +9,7 @@ const router = express.Router();
 const { MongoClient, ObjectId } = require('mongodb');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.MONGODB_DATABASE || 'credit_risk_db';
+const DB_NAME = 'aegisai'; // Changed from credit_risk_db to match seed script
 
 /**
  * GET /api/loans/user/:userId
@@ -26,41 +26,33 @@ router.get('/user/:userId', async (req, res) => {
     await client.connect();
     const db = client.db(DB_NAME);
     
-    // Get user's predictions (loan applications)
-    const predictions = await db.collection('predictions')
-      .find({ user_id: userId })
-      .sort({ timestamp: -1 })
+    // Get user's loans from the loans collection
+    const loans = await db.collection('loans')
+      .find({ userId: userId })
+      .sort({ applicationDate: -1 })
       .toArray();
     
-    // Categorize loans based on approval probability and risk category
-    const approvedLoans = predictions.filter(p => 
-      p.risk_category === 'Low' || 
-      p.approval_probability > 0.6
-    );
-    
-    const rejectedLoans = predictions.filter(p => 
-      p.risk_category === 'High' || 
-      p.approval_probability < 0.4
-    );
-    
-    const pendingLoans = predictions.filter(p => 
-      p.risk_category === 'Medium' ||
-      (p.approval_probability >= 0.4 && p.approval_probability <= 0.6)
-    );
+    // Categorize loans by status
+    const ongoingLoans = loans.filter(l => l.status === 'ongoing');
+    const completedLoans = loans.filter(l => l.status === 'completed');
+    const pendingLoans = loans.filter(l => l.status === 'pending');
+    const rejectedLoans = loans.filter(l => l.status === 'rejected');
     
     // Format response
     const response = {
       success: true,
       data: {
-        total_applications: predictions.length,
-        approved: approvedLoans.length,
-        rejected: rejectedLoans.length,
+        total_applications: loans.length,
+        ongoing: ongoingLoans.length,
+        completed: completedLoans.length,
         pending: pendingLoans.length,
+        rejected: rejectedLoans.length,
         loans: {
-          approved: approvedLoans.map(formatLoan),
-          rejected: rejectedLoans.map(formatLoan),
-          pending: pendingLoans.map(formatLoan),
-          all: predictions.map(formatLoan)
+          ongoing: ongoingLoans.map(formatLoanData),
+          completed: completedLoans.map(formatLoanData),
+          pending: pendingLoans.map(formatLoanData),
+          rejected: rejectedLoans.map(formatLoanData),
+          all: loans.map(formatLoanData)
         }
       }
     };
@@ -82,7 +74,7 @@ router.get('/user/:userId', async (req, res) => {
 
 /**
  * GET /api/loans/recent
- * Get recent loan applications (for demo purposes)
+ * Get recent loan applications (for admin dashboard)
  */
 router.get('/recent', async (req, res) => {
   let client;
@@ -95,18 +87,18 @@ router.get('/recent', async (req, res) => {
     await client.connect();
     const db = client.db(DB_NAME);
     
-    // Get recent predictions
-    const predictions = await db.collection('predictions')
+    // Get recent loans
+    const loans = await db.collection('loans')
       .find({})
-      .sort({ timestamp: -1 })
+      .sort({ applicationDate: -1 })
       .limit(limit)
       .toArray();
     
     const response = {
       success: true,
       data: {
-        count: predictions.length,
-        loans: predictions.map(formatLoan)
+        count: loans.length,
+        loans: loans.map(formatLoanData)
       }
     };
     
@@ -178,7 +170,36 @@ router.get('/:loanId', async (req, res) => {
 });
 
 /**
- * Helper function to format loan data
+ * Helper function to format loan data from loans collection
+ */
+function formatLoanData(loan) {
+  return {
+    id: loan._id.toString(),
+    userId: loan.userId,
+    userName: loan.userName,
+    loanAmount: loan.loanAmount,
+    loanPurpose: loan.loanPurpose,
+    status: loan.status,
+    approvalStatus: loan.approvalStatus,
+    applicationDate: loan.applicationDate,
+    approvalDate: loan.approvalDate,
+    disbursementDate: loan.disbursementDate,
+    completionDate: loan.completionDate,
+    rejectionDate: loan.rejectionDate,
+    rejectionReason: loan.rejectionReason,
+    tenure: loan.tenure,
+    interestRate: loan.interestRate,
+    monthlyEMI: loan.monthlyEMI,
+    paidEMIs: loan.paidEMIs,
+    remainingEMIs: loan.remainingEMIs,
+    nextDueDate: loan.nextDueDate,
+    creditScore: loan.creditScore,
+    mlPrediction: loan.mlPrediction
+  };
+}
+
+/**
+ * Helper function to format loan data from predictions collection (legacy)
  */
 function formatLoan(prediction) {
   const input = prediction.input_data || {};

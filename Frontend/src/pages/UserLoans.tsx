@@ -2,23 +2,24 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Clock, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import UserDashboardLayout from '../layouts/UserDashboardLayout';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const UserLoans = () => {
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [loans, setLoans] = useState<any>(null);
-    const [activeTab, setActiveTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
-
-    // For demo purposes, using a default user ID
-    const userId = 'demo-user-001';
+    const [activeTab, setActiveTab] = useState<'all' | 'ongoing' | 'completed' | 'pending' | 'rejected'>('all');
 
     useEffect(() => {
-        fetchUserLoans();
-    }, []);
+        if (user?.email) {
+            fetchUserLoans();
+        }
+    }, [user]);
 
     const fetchUserLoans = async () => {
         try {
             setLoading(true);
-            const response = await api.getUserLoans(userId);
+            const response = await api.getUserLoans(user!.email);
             
             if (response.success) {
                 setLoans(response.data);
@@ -60,8 +61,10 @@ const UserLoans = () => {
         if (!loans?.loans) return [];
         
         switch (activeTab) {
-            case 'approved':
-                return loans.loans.approved || [];
+            case 'ongoing':
+                return loans.loans.ongoing || [];
+            case 'completed':
+                return loans.loans.completed || [];
             case 'pending':
                 return loans.loans.pending || [];
             case 'rejected':
@@ -93,7 +96,7 @@ const UserLoans = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <div className="flex items-center justify-between">
                             <div>
@@ -109,8 +112,20 @@ const UserLoans = () => {
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-500 font-medium">Approved</p>
-                                <h3 className="text-2xl font-bold text-green-600 mt-1">{loans?.approved || 0}</h3>
+                                <p className="text-sm text-gray-500 font-medium">Ongoing</p>
+                                <h3 className="text-2xl font-bold text-blue-600 mt-1">{loans?.ongoing || 0}</h3>
+                            </div>
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                                <TrendingUp className="w-6 h-6 text-blue-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-500 font-medium">Completed</p>
+                                <h3 className="text-2xl font-bold text-green-600 mt-1">{loans?.completed || 0}</h3>
                             </div>
                             <div className="p-3 bg-green-50 rounded-lg">
                                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -158,14 +173,24 @@ const UserLoans = () => {
                                 All Loans ({loans?.total_applications || 0})
                             </button>
                             <button
-                                onClick={() => setActiveTab('approved')}
+                                onClick={() => setActiveTab('ongoing')}
                                 className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                                    activeTab === 'approved'
+                                    activeTab === 'ongoing'
+                                        ? 'border-blue-600 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                Ongoing ({loans?.ongoing || 0})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('completed')}
+                                className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                                    activeTab === 'completed'
                                         ? 'border-green-600 text-green-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                Approved ({loans?.approved || 0})
+                                Completed ({loans?.completed || 0})
                             </button>
                             <button
                                 onClick={() => setActiveTab('pending')}
@@ -198,58 +223,95 @@ const UserLoans = () => {
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start space-x-4 flex-1">
                                             <div className={`p-3 rounded-lg ${
-                                                loan.status === 'Approved' ? 'bg-green-100' :
-                                                loan.status === 'Rejected' ? 'bg-red-100' :
+                                                loan.status === 'ongoing' ? 'bg-blue-100' :
+                                                loan.status === 'completed' ? 'bg-green-100' :
+                                                loan.status === 'rejected' ? 'bg-red-100' :
                                                 'bg-amber-100'
                                             }`}>
-                                                {getStatusIcon(loan.status)}
+                                                {loan.status === 'ongoing' && <TrendingUp className="w-5 h-5 text-blue-600" />}
+                                                {loan.status === 'completed' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                                                {loan.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
+                                                {loan.status === 'pending' && <AlertCircle className="w-5 h-5 text-amber-600" />}
                                             </div>
                                             
                                             <div className="flex-1">
                                                 <div className="flex items-center space-x-3 mb-2">
-                                                    <h3 className="text-lg font-semibold text-primary">{loan.loan_type}</h3>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(loan.status)}`}>
-                                                        {loan.status}
+                                                    <h3 className="text-lg font-semibold text-primary">{loan.loanPurpose}</h3>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                                        loan.status === 'ongoing' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                                                        loan.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+                                                        loan.status === 'rejected' ? 'bg-red-100 text-red-700 border-red-200' :
+                                                        'bg-amber-100 text-amber-700 border-amber-200'
+                                                    }`}>
+                                                        {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
                                                     </span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
                                                     <div>
                                                         <p className="text-xs text-gray-500 mb-1">Amount</p>
-                                                        <p className="font-semibold text-primary">${loan.amount.toLocaleString()}</p>
+                                                        <p className="font-semibold text-primary">${loan.loanAmount.toLocaleString()}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-xs text-gray-500 mb-1">Applied Date</p>
                                                         <p className="font-medium text-gray-700 flex items-center">
                                                             <Calendar className="w-3 h-3 mr-1" />
-                                                            {new Date(loan.applied_date).toLocaleDateString()}
+                                                            {new Date(loan.applicationDate).toLocaleDateString()}
                                                         </p>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-xs text-gray-500 mb-1">Risk Score</p>
-                                                        <p className="font-medium text-gray-700">{loan.risk_score.toFixed(1)}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs text-gray-500 mb-1">Confidence</p>
-                                                        <p className="font-medium text-gray-700 flex items-center">
-                                                            <TrendingUp className="w-3 h-3 mr-1" />
-                                                            {(loan.confidence * 100).toFixed(0)}%
-                                                        </p>
-                                                    </div>
+                                                    {loan.monthlyEMI && (
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 mb-1">Monthly EMI</p>
+                                                            <p className="font-medium text-gray-700">${loan.monthlyEMI.toLocaleString()}</p>
+                                                        </div>
+                                                    )}
+                                                    {loan.tenure && (
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 mb-1">Tenure</p>
+                                                            <p className="font-medium text-gray-700">{loan.tenure} months</p>
+                                                        </div>
+                                                    )}
                                                 </div>
 
-                                                {loan.status === 'Pending' && (
-                                                    <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                                                        <p className="text-xs text-amber-800">
-                                                            <strong>Approval Probability:</strong> {(loan.approval_probability * 100).toFixed(0)}% - Your application is under review
+                                                {loan.status === 'ongoing' && (
+                                                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                                        <div className="grid grid-cols-3 gap-4 text-xs">
+                                                            <div>
+                                                                <p className="text-blue-600 font-medium">Paid EMIs</p>
+                                                                <p className="text-blue-800 font-bold">{loan.paidEMIs}/{loan.tenure}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-blue-600 font-medium">Next Due</p>
+                                                                <p className="text-blue-800 font-bold">{new Date(loan.nextDueDate).toLocaleDateString()}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-blue-600 font-medium">Interest Rate</p>
+                                                                <p className="text-blue-800 font-bold">{loan.interestRate}%</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {loan.status === 'completed' && (
+                                                    <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                                        <p className="text-xs text-green-800">
+                                                            <strong>Completed on:</strong> {new Date(loan.completionDate).toLocaleDateString()} - All EMIs paid successfully
                                                         </p>
                                                     </div>
                                                 )}
 
-                                                {loan.status === 'Rejected' && (
+                                                {loan.status === 'pending' && loan.mlPrediction && (
+                                                    <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                                        <p className="text-xs text-amber-800">
+                                                            <strong>ML Prediction:</strong> {(loan.mlPrediction.confidence * 100).toFixed(0)}% confidence - Your application is under review
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                {loan.status === 'rejected' && (
                                                     <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
                                                         <p className="text-xs text-red-800">
-                                                            <strong>Reason:</strong> High risk score ({loan.risk_score.toFixed(1)}). Consider improving your credit history or reducing loan amount.
+                                                            <strong>Reason:</strong> {loan.rejectionReason || 'Application did not meet approval criteria'}
                                                         </p>
                                                     </div>
                                                 )}

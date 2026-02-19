@@ -67,7 +67,7 @@ class AlertIntegration {
 
     async checkSystemHealth() {
         try {
-            const response = await axios.get(`${process.env.ML_API_URL}/system-health`);
+            const response = await axios.get(`${process.env.ML_API_URL}/monitoring/health`);
             const health = response.data;
 
             if (health.has_alerts) {

@@ -114,7 +114,8 @@ export interface LLMInteraction {
 export const api = {
   // Predictions
   async predict(data: PredictionInput): Promise<PredictionResponse> {
-    const response = await fetch(`${API_BASE_URL}/predict`, {
+    const BACKEND_URL = 'http://localhost:5000'; // Use backend, not ML API directly
+    const response = await fetch(`${BACKEND_URL}/api/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
